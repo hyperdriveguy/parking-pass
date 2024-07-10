@@ -5,33 +5,37 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Parking Pass Data</h1>
-
-    <h2>Latest Data</h2>
-    <table>
-        <thead>
-            <tr>
-                {% for header in latest_data[0].keys() %}
-                <th>{{ header }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in latest_data %}
-            <tr>
-                {% for value in row.values() %}
-                <td>{{ value }}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h2>Historical Data</h2>
-    {% for plot_data in history_plots %}
-    <img src="data:image/png;base64,{{ plot_data }}" alt="Historical Parking Data">
-    {% endfor %}
-
+    <main>
+        <h1>Parking Pass Data</h1>
+        <h2>Latest Data</h2>
+        <section>
+            <table>
+                <thead>
+                    <tr>
+                        {% for header in latest_data[0].keys() %}
+                        <th>{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in latest_data %}
+                    <tr>
+                        {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        <h2>Historical Data</h2>
+        <section class="flex">
+        {% for plot_data in history_plots %}
+        <img src="data:image/png;base64,{{ plot_data }}" alt="Historical Parking Data">
+        {% endfor %}
+        </section>
+    </main>
+    <footer><div id="countdown"></div></footer>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>
