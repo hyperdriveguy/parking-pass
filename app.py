@@ -22,7 +22,7 @@ def scrape_and_update_data():
     
     # Add a timestamp field to each row
     for row in data:
-        row['timestamp'] = datetime.now().isoformat()
+        row['Timestamp'] = datetime.now().isoformat()
 
     # Check if the CSV file exists
     if not os.path.isfile('data.csv'):
@@ -45,9 +45,9 @@ def generate_historical_plots(data):
     # Group the data by pass type
     data_by_type = defaultdict(list)
     for row in data:
-        pass_type = row['pass_type']
-        timestamp = datetime.fromisoformat(row['timestamp'])
-        available = row['available']
+        pass_type = row['Pass Type']
+        timestamp = datetime.fromisoformat(row['Timestamp'])
+        available = row['Available']
         data_by_type[pass_type].append((timestamp, available))
 
     # Create a plot for each pass type
@@ -90,10 +90,8 @@ def index():
 
     # Generate the historical plot
     history_plots = generate_historical_plots(data)
-    print('history_plots: ', history_plots)
-    # Pass the latest data and plot data to the template for rendering
 
-    # Pass the latest data to the template for rendering
+    # Pass the latest data and plot data to the template for rendering
     return render_template('index.html', latest_data=latest_data, history_plots=history_plots)
 
 @app.route('/parking-data')

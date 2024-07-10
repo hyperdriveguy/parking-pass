@@ -116,11 +116,11 @@ def scrape_parking_pass_info():
 
         cost, valid_from, valid_to = parse_pass_details(pass_details_html)
         pass_details.append({
-            "pass_type": coverage_dates,
-            "cost": cost,
-            "available": available,
-            "valid_from": valid_from,
-            "valid_to": valid_to
+            "Pass Type": coverage_dates,
+            'Cost': cost,
+            "Available": available,
+            "Valid From": valid_from,
+            "Valid To": valid_to
         })
 
     return pass_details
@@ -130,11 +130,11 @@ def print_pass_details(pass_details):
     Prints the parking pass details in a formatted way.
     """
     for pass_detail in pass_details:
-        print(f"Pass Type: {pass_detail['pass_type']}")
-        print(f"Cost: {pass_detail['cost']}")
-        print(f"Available: {pass_detail['available']}")
-        print(f"Valid From: {pass_detail['valid_from']}")
-        print(f"Valid Through: {pass_detail['valid_to']}")
+        print(f"Pass Type: {pass_detail['Pass Type']}")
+        print(f"Cost: {pass_detail['Cost']}")
+        print(f"Available: {pass_detail['Available']}")
+        print(f"Valid From: {pass_detail['Valid From']}")
+        print(f"Valid Through: {pass_detail['Valid To']}")
         print("")
 
 if __name__ == "__main__":
