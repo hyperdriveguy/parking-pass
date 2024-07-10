@@ -2,26 +2,7 @@
 <html>
 <head>
     <title>Parking Pass Data</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .highlighted {
-            background-color: #e6e6e6;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>Parking Pass Data</h1>
@@ -51,20 +32,6 @@
     <img src="data:image/png;base64,{{ plot_data }}" alt="Historical Parking Data">
     {% endfor %}
 
-    <script>
-        // Get all table rows
-        const tableRows = document.querySelectorAll('tbody tr');
-
-        // Add click event listener to each row
-        tableRows.forEach(row => {
-            row.addEventListener('click', () => {
-                // Remove the highlighted class from all rows
-                tableRows.forEach(r => r.classList.remove('highlighted'));
-
-                // Add the highlighted class to the clicked row
-                row.classList.add('highlighted');
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>
