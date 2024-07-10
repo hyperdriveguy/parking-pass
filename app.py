@@ -19,6 +19,7 @@ subdir_endpoint = '/parking-watch'
 
 app = Flask(__name__)
 scheduler = sched.scheduler(time.time, time.sleep)
+scheduler_thread = threading.Thread(target=scheduler.run)
 
 def scrape_and_update_data():
     data = rexburg_pass.scrape_parking_pass_info()
@@ -136,7 +137,6 @@ def parking_data():
 
 def wsgi_runner():
     scrape_and_update_data()  # Scrape data initially
-    scheduler_thread = threading.Thread(target=scheduler.run)
     scheduler_thread.start()
     scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
     app.run()
@@ -144,7 +144,6 @@ def wsgi_runner():
 
 if __name__ == '__main__':
     scrape_and_update_data()  # Scrape data initially
-    scheduler_thread = threading.Thread(target=scheduler.run)
     scheduler_thread.start()
     scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
     app.run(debug=True) # Debug mode
