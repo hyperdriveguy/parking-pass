@@ -1,4 +1,4 @@
-from app import app
+from app import wsgi_runner
 
 if __name__ == "__main__":
-    app.run()
+    wsgi_runner()

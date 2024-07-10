@@ -42,8 +42,6 @@ def scrape_and_update_data():
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writerows(data)
 
-    scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
-
 def convert_to_float(value):
     # Remove non-numeric characters from the string
     cleaned_value = re.sub(r'[^0-9\.]', '', value)
@@ -112,9 +110,12 @@ def generate_historical_plots(data):
 def index():
     # Read data from the local CSV file
     data = []
-    with open('data.csv', 'r') as file:
-        reader = csv.DictReader(file)
-        data = list(reader)  # Convert reader to a list
+    try:
+        with open('data.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            data = list(reader)  # Convert reader to a list
+    except FileNotFoundError:
+        scrape_and_update_data()  # Scrape data initially
 
     # Get the last row as the latest data
     if data:
@@ -133,9 +134,18 @@ def parking_data():
     data = rexburg_pass.scrape_parking_pass_info()
     return jsonify(data)
 
+def wsgi_runner():
+    scrape_and_update_data()  # Scrape data initially
+    scheduler_thread = threading.Thread(target=scheduler.run)
+    scheduler_thread.start()
+    scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
+    app.run()
+    scheduler_thread.join()  # Wait for the scheduler to finish
+
 if __name__ == '__main__':
     scrape_and_update_data()  # Scrape data initially
     scheduler_thread = threading.Thread(target=scheduler.run)
     scheduler_thread.start()
-    app.run(debug=True)
+    scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
+    app.run(debug=True) # Debug mode
     scheduler_thread.join()  # Wait for the scheduler to finish
