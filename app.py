@@ -15,6 +15,8 @@ import os
 from datetime import datetime
 import re
 
+subdir_endpoint = '/parking-watch'
+
 app = Flask(__name__)
 scheduler = sched.scheduler(time.time, time.sleep)
 
@@ -106,7 +108,7 @@ def generate_historical_plots(data):
 
     return available_plot_data, cost_plot_data
 
-@app.route('/')
+@app.route(subdir_endpoint + '/')
 def index():
     # Read data from the local CSV file
     data = []
@@ -126,7 +128,7 @@ def index():
     # Pass the latest data and plot data to the template for rendering
     return render_template('index.html', latest_data=latest_data, history_plots=history_plots)
 
-@app.route('/parking-data')
+@app.route(subdir_endpoint + '/latest')
 def parking_data():
     data = rexburg_pass.scrape_parking_pass_info()
     return jsonify(data)
