@@ -13,6 +13,7 @@ import base64
 from collections import defaultdict
 import os
 from datetime import datetime
+import re
 
 app = Flask(__name__)
 scheduler = sched.scheduler(time.time, time.sleep)
@@ -41,38 +42,69 @@ def scrape_and_update_data():
 
     scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
 
+def convert_to_float(value):
+    # Remove non-numeric characters from the string
+    cleaned_value = re.sub(r'[^0-9\.]', '', value)
+    
+    # Convert the cleaned string to a float
+    return float(cleaned_value)
+
 def generate_historical_plots(data):
     # Group the data by pass type
     data_by_type = defaultdict(list)
     for row in data:
         pass_type = row['Pass Type']
         timestamp = datetime.fromisoformat(row['Timestamp'])
-        available = row['Available']
-        data_by_type[pass_type].append((timestamp, available))
+        available = float(row['Available'])
+        cost = convert_to_float(row['Cost'])  # Convert cost to float
+        data_by_type[pass_type].append((timestamp, available, cost))
 
-    # Create a plot for each pass type
-    plots = []
-    for pass_type, type_data in data_by_type.items():
-        timestamps, availables = zip(*type_data)
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.plot(timestamps, availables)
-        ax.set_xlabel('Timestamp')
-        ax.set_ylabel('Available Passes')
-        ax.set_title(f'Historical Parking Pass Data - {pass_type}')
+    # Create a plot for available passes with different colored lines
+    fig, ax = plt.subplots(figsize=(8, 6))
+    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+    for i, (pass_type, type_data) in enumerate(data_by_type.items()):
+        timestamps, availables, _ = zip(*type_data)
+        ax.plot(timestamps, availables, color=colors[i % len(colors)], label=pass_type)
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Available Passes')
+    ax.set_title('Historical Parking Pass Data - Available Passes')
+    ax.legend()
+    ax.set_ylim(bottom=0)  # Set y-axis to start at 0
 
-        # Save the plot to a buffer
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png')
-        buf.seek(0)
+    # Save the plot to a buffer
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
 
-        # Encode the plot as a base64 string
-        plot_data = base64.b64encode(buf.read()).decode('utf-8')
-        plots.append(plot_data)
+    # Encode the plot as a base64 string
+    available_plot_data = base64.b64encode(buf.read()).decode('utf-8')
 
-        # Close the plot
-        plt.close(fig)
+    # Close the plot
+    plt.close(fig)
 
-    return plots
+    # Create a plot for cost with different colored lines
+    fig, ax = plt.subplots(figsize=(8, 6))
+    for i, (pass_type, type_data) in enumerate(data_by_type.items()):
+        timestamps, _, costs = zip(*type_data)
+        ax.plot(timestamps, costs, color=colors[i % len(colors)], label=pass_type)
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Cost')
+    ax.set_title('Historical Parking Pass Data - Cost in USD')
+    ax.legend()
+    ax.set_ylim(bottom=0)  # Set y-axis to start at 0
+
+    # Save the plot to a buffer
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+
+    # Encode the plot as a base64 string
+    cost_plot_data = base64.b64encode(buf.read()).decode('utf-8')
+
+    # Close the plot
+    plt.close(fig)
+
+    return available_plot_data, cost_plot_data
 
 @app.route('/')
 def index():
