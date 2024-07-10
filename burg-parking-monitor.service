@@ -6,9 +6,9 @@ After=network.target
 User=carson
 Group=carson
 WorkingDirectory=/home/carson/parking-pass
-ExecStartPre=/bin/rm -f /run/parking-watch.sock
-ExecStart=/usr/bin/gunicorn --workers 3 --bind unix:/run/parking-watch.sock -m 007 wsgi:app
-ExecStopPost=/bin/rm -f /run/parking-watch.sock
+ExecStartPre=/bin/rm -f parking-watch.sock
+ExecStart=/usr/bin/gunicorn --workers 3 --bind unix:parking-watch.sock -m 007 wsgi:app
+ExecStopPost=/bin/rm -f parking-watch.sock
 Restart=always
 
 [Install]
