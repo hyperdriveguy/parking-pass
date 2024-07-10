@@ -17,7 +17,6 @@ from datetime import datetime
 app = Flask(__name__)
 scheduler = sched.scheduler(time.time, time.sleep)
 
-
 def scrape_and_update_data():
     data = rexburg_pass.scrape_parking_pass_info()
     
@@ -41,7 +40,6 @@ def scrape_and_update_data():
             writer.writerows(data)
 
     scheduler.enter(1800, 1, scrape_and_update_data)  # Schedule the next scrape in 30 minutes
-
 
 def generate_historical_plots(data):
     # Group the data by pass type
@@ -86,7 +84,7 @@ def index():
 
     # Get the last row as the latest data
     if data:
-        latest_data = [data[-1], data[-2]]
+        latest_data = [data[-2], data[-1]]
     else:
         latest_data = []
 
@@ -97,8 +95,6 @@ def index():
 
     # Pass the latest data to the template for rendering
     return render_template('index.html', latest_data=latest_data, history_plots=history_plots)
-
-
 
 @app.route('/parking-data')
 def parking_data():
