@@ -1,12 +1,12 @@
 [Unit]
-Description=Parking Watch Gunicorn Daemon
+Description=Rexburg Parking Watch Gunicorn Daemon
 After=network.target
 
 [Service]
 User=carson
-Group=www-data
-WorkingDirectory=/path/to/your/app
-ExecStart=/usr/local/bin/gunicorn --workers 3 --bind unix:/tmp/parking-watch.sock -m 007 wsgi:app
+Group=carson
+WorkingDirectory=/home/carson/parking-pass
+ExecStart=/usr/bin/gunicorn --workers 3 --bind unix:/tmp/parking-watch.sock -m 007 wsgi:app
 
 [Install]
 WantedBy=multi-user.target
