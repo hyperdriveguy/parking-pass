@@ -29,7 +29,7 @@
             </table>
         </section>
         <h2>Historical Data</h2>
-        <section class="flex">
+        <section>
         {% for plot_data in history_plots %}
         <img src="data:image/png;base64,{{ plot_data }}" alt="Historical Parking Data">
         {% endfor %}

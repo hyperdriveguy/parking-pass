@@ -51,7 +51,7 @@ def generate_historical_plots(data):
         data_by_type[pass_type].append((timestamp, available, cost))
 
     # Create a plot for available passes with different colored lines
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     for i, (pass_type, type_data) in enumerate(data_by_type.items()):
         timestamps, availables, _ = zip(*type_data)
@@ -74,7 +74,7 @@ def generate_historical_plots(data):
     plt.close(fig)
 
     # Create a plot for cost with different colored lines
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     for i, (pass_type, type_data) in enumerate(data_by_type.items()):
         timestamps, _, costs = zip(*type_data)
         ax.plot(timestamps, costs, color=colors[i % len(colors)], label=pass_type)
