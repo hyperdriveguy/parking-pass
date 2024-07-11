@@ -8,7 +8,7 @@ tableRows.forEach(row => {
 });
 
 // Setup SSE
-const evtSource = new EventSource("/stream");
+const evtSource = new EventSource("/parking-watch/stream");
 evtSource.onmessage = function(event) {
     const data = JSON.parse(event.data);
     updateLatestData(data);
