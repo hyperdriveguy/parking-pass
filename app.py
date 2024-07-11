@@ -57,7 +57,7 @@ def parking_data():
     latest_data = get_latest_data(read_data_from_csv())
     return jsonify(latest_data)
 
-@app.route('/stream')
+@app.route(subdir_endpoint + '/stream')
 def stream():
     def event_stream():
         while True:
