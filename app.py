@@ -1,19 +1,12 @@
-import os
-from flask import Flask, render_template, jsonify, send_from_directory, Response, url_for
+from flask import Flask, render_template, jsonify, Response
 import csv
-from pass_history import generate_historical_plots, scrape_and_update_data
+from pass_history import scrape_and_update_data, get_cached_plots_filenames
 import time
 import json
 
 subdir_endpoint = '/parking-watch'
 
 app = Flask(__name__)
-
-STATIC_DIR = os.path.join(app.root_path, 'static')
-PLOTS_DIR = os.path.join(STATIC_DIR, 'plots')
-
-if not os.path.exists(PLOTS_DIR):
-    os.makedirs(PLOTS_DIR)
 
 def read_data_from_csv():
     data = []
@@ -37,19 +30,9 @@ def get_latest_data(data):
 
 @app.route(subdir_endpoint + '/')
 def index():
-    data = read_data_from_csv()
-    latest_data = get_latest_data(data)
-    plot_filenames = generate_and_cache_plots(data)
+    latest_data = get_latest_data(read_data_from_csv())
+    plot_filenames = get_cached_plots_filenames()
     return render_template('index.html', latest_data=latest_data, plot_filenames=plot_filenames)
-
-def generate_and_cache_plots(data):
-    plot_data = generate_historical_plots(data)
-    for data_name, plot in plot_data.items():
-        filename = f'{data_name}.png'
-        filepath = os.path.join(PLOTS_DIR, filename)
-        with open(filepath, 'wb') as f:
-            f.write(plot.getvalue())
-    return tuple(plot_data.keys())
 
 @app.route(subdir_endpoint + '/latest')
 def parking_data():

@@ -42,7 +42,7 @@
         <h2>Historical Data</h2>
         <section id="historical-data">
             {% for filename in plot_filenames %}
-            <img src="{{ url_for('static', filename='plots/' + filename + '.png') }}" alt="Historical Parking Data">
+            <img src="{{ url_for('static', filename='plots/' + filename) }}" alt="Historical Parking Data">
             {% endfor %}
         </section>
     </main>

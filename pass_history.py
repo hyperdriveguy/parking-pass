@@ -11,6 +11,11 @@ from datetime import datetime
 import re
 from time import sleep
 
+PLOTS_DIR = 'static/plots/'
+
+if not os.path.exists(PLOTS_DIR):
+    os.makedirs(PLOTS_DIR)
+
 def scrape_and_update_data():
     data = rexburg_pass.scrape_parking_pass_info()
     
@@ -90,6 +95,17 @@ def generate_historical_plots(data) -> dict:
     plt.close(fig)
 
     return {'availability': available_plot_data, 'cost': cost_plot_data}
+
+def generate_and_cache_plots(data):
+    plot_data = generate_historical_plots(data)
+    for data_name, plot in plot_data.items():
+        filename = f'{data_name}.png'
+        filepath = os.path.join(PLOTS_DIR, filename)
+        with open(filepath, 'wb') as f:
+            f.write(plot.getvalue())
+
+def get_cached_plots_filenames():
+    return os.listdir(PLOTS_DIR)
 
 def trim_csv_data(csv_file):
     with open(csv_file, 'r') as infile:
