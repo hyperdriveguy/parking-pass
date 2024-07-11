@@ -91,13 +91,53 @@ def generate_historical_plots(data) -> dict:
 
     return {'availability': available_plot_data, 'cost': cost_plot_data}
 
+def trim_csv_data(csv_file):
+    with open(csv_file, 'r') as infile:
+        reader = csv.reader(infile)
+        header = next(reader)  # Read the header row
+        
+        trimmed_data = [header]
+        last_seen = {}  # Dictionary to store the last seen values for each pass type
+
+        for row in reader:
+            pass_type, cost, available, valid_from, valid_to, timestamp = row
+            cost = convert_to_float(cost)
+            available = int(available)
+            
+            # Check if this pass type has been seen before
+            if pass_type in last_seen:
+                last_cost, last_available = last_seen[pass_type]
+                # Add row only if cost or available has changed
+                if cost != last_cost or available != last_available:
+                    trimmed_data.append(row)
+                    last_seen[pass_type] = (cost, available)
+            else:
+                # First occurrence of this pass type
+                trimmed_data.append(row)
+                last_seen[pass_type] = (cost, available)
+        
+        # Append the last seen data points for each pass type to the trimmed_data
+        for pass_type, (cost, available) in last_seen.items():
+            if trimmed_data[-1][:2] != [pass_type, str(cost)]:  # Ensure not to duplicate the last line
+                trimmed_data.append([pass_type, cost, available, valid_from, valid_to, timestamp])
+
+    with open(csv_file, 'w', newline='') as outfile:
+        writer = csv.writer(outfile)
+        writer.writerows(trimmed_data)
+
 def run_scraper_forever():
+    # countdown = 48
     while True:
         print('Scraping data from city of Rexburg website...', flush=True)
         scrape_and_update_data()
-        print('Done, next scrape in 20 seconds\n', flush=True)
-        # sleep(1800)  # Sleep for 30 minutes (1800 seconds)
-        sleep(20)
+        print('Done, next scrape in 30 minutes\n', flush=True)
+        # if countdown == 0:
+        #     print('Doing periodic data trim...this may take a while...')
+        #     trim_csv_data('data.csv')
+        #     print('Finished data trim')
+        #     countdown = 48
+        # countdown -= 1
+        sleep(1800)  # Sleep for 30 minutes (1800 seconds)
 
 if __name__ == '__main__':
     run_scraper_forever()
