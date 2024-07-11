@@ -1,0 +1,12 @@
+[Unit]
+Description=Rexburg Parking Info Scraper
+After=network.target
+
+[Service]
+User=carson
+Group=carson
+WorkingDirectory=/home/carson/parking-pass
+ExecStart=/usr/bin/python pass_history.py
+
+[Install]
+WantedBy=multi-user.target

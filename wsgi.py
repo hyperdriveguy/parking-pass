@@ -1,4 +1,4 @@
-from app import wsgi_and_scraper
+from app import app
 
 if __name__ == "__main__":
-    wsgi_and_scraper()
+    app.run()

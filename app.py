@@ -1,8 +1,7 @@
 import os
 from flask import Flask, render_template, jsonify, send_from_directory, Response, url_for
 import csv
-from multiprocessing import Process
-from pass_history import generate_historical_plots, scrape_and_update_data, run_scraper_forever
+from pass_history import generate_historical_plots, scrape_and_update_data
 import time
 import json
 
@@ -68,10 +67,5 @@ def stream():
 
     return Response(event_stream(), mimetype="text/event-stream")
 
-def wsgi_and_scraper():
-    Process(target=run_scraper_forever, daemon=True).start()
-    app.run()
-
 if __name__ == '__main__':
-    Process(target=run_scraper_forever, daemon=True).start()
     app.run(debug=True)
