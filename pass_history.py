@@ -40,7 +40,7 @@ def convert_to_float(value):
     # Convert the cleaned string to a float
     return float(cleaned_value)
 
-def generate_historical_plots(data):
+def generate_historical_plots(data) -> dict:
     # Group the data by pass type
     data_by_type = defaultdict(list)
     for row in data:
@@ -63,12 +63,9 @@ def generate_historical_plots(data):
     ax.set_ylim(bottom=0)  # Set y-axis to start at 0
 
     # Save the plot to a buffer
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png')
-    buf.seek(0)
-
-    # Encode the plot as a base64 string
-    available_plot_data = base64.b64encode(buf.read()).decode('utf-8')
+    available_plot_data = io.BytesIO()
+    fig.savefig(available_plot_data, format='png')
+    available_plot_data.seek(0)
 
     # Close the plot
     plt.close(fig)
@@ -85,17 +82,14 @@ def generate_historical_plots(data):
     ax.set_ylim(bottom=0)  # Set y-axis to start at 0
 
     # Save the plot to a buffer
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png')
-    buf.seek(0)
-
-    # Encode the plot as a base64 string
-    cost_plot_data = base64.b64encode(buf.read()).decode('utf-8')
+    cost_plot_data = io.BytesIO()
+    fig.savefig(cost_plot_data, format='png')
+    cost_plot_data.seek(0)
 
     # Close the plot
     plt.close(fig)
 
-    return available_plot_data, cost_plot_data
+    return {'availability': available_plot_data, 'cost': cost_plot_data}
 
 def run_scraper_forever():
     while True:

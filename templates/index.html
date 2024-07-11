@@ -8,8 +8,8 @@
     <main>
         <h1>Parking Pass Data</h1>
         <h2>Latest Data</h2>
-        <section>
-            <table>
+        <section id="latest-data">
+            <table class="table-view">
                 <thead>
                     <tr>
                         {% for header in latest_data[0].keys() %}
@@ -27,12 +27,23 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div class="card-view">
+                {% for row in latest_data %}
+                <div class="card">
+                    <h3>{{ row['Pass Type'] }}</h3>
+                    <p>Available: {{ row['Available'] }}</p>
+                    <p>{{ row['Cost'] }}</p>
+                    <p>{{ row['Valid From'] }} to {{ row['Valid To'] }}</p>
+                    <p>Last updated: {{ row['Timestamp'] }}</p>
+                </div>
+                {% endfor %}
+            </div>
         </section>
         <h2>Historical Data</h2>
-        <section>
-        {% for plot_data in history_plots %}
-        <img src="data:image/png;base64,{{ plot_data }}" alt="Historical Parking Data">
-        {% endfor %}
+        <section id="historical-data">
+            {% for filename in plot_filenames %}
+            <img src="{{ url_for('static', filename='plots/' + filename + '.png') }}" alt="Historical Parking Data">
+            {% endfor %}
         </section>
     </main>
     <footer><div id="countdown"></div></footer>
