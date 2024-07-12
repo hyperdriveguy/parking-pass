@@ -7,7 +7,7 @@ User=carson
 Group=carson
 WorkingDirectory=/home/carson/parking-pass
 ExecStartPre=/bin/rm -f parking-watch.sock
-ExecStart=/usr/bin/gunicorn --workers 3 --bind unix:parking-watch.sock --timeout 120 -m 007 wsgi:app
+ExecStart=/usr/bin/gunicorn --workers 3 --bind unix:parking-watch.sock -k gevent -m 007 wsgi:app
 ExecStopPost=/bin/rm -f parking-watch.sock
 Restart=always
 
