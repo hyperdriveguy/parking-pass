@@ -113,10 +113,10 @@ def trim_csv_data(csv_file):
         header = next(reader)  # Read the header row
         
         # Read all rows into memory
-        all_rows = list(reader)
+        all_rows = [row for row in reader if row]  # Filter out empty rows
         
         # Get all unique pass types
-        all_pass_types = set(row[header.index('Pass Type')] for row in all_rows if len(row) > 0)
+        all_pass_types = set(row[header.index('Pass Type')] for row in all_rows)
         print('All pass types:', all_pass_types)
 
         unique_data_points = []
