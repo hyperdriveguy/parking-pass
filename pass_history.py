@@ -112,28 +112,33 @@ def trim_csv_data(csv_file):
         reader = csv.reader(infile)
         header = next(reader)  # Read the header row
         
+        # Read all rows into memory
+        all_rows = list(reader)
+        
         # Get all unique pass types
-        pass_types = set(row[header.index('Pass Type')] for row in reader)
+        all_pass_types = set(row[header.index('Pass Type')] for row in all_rows)
+        print('All pass types:', all_pass_types)
 
         unique_data_points = []
         for pass_type in all_pass_types:
             # Get all updates for the current pass type sorted by timestamp
-            updates = sorted([row for row in reader if row[header.index('Pass Type')] == pass_type],
+            updates = sorted([row for row in all_rows if row[header.index('Pass Type')] == pass_type],
                              key=lambda row: row[header.index('Timestamp')])
+            print(f'Updates for {pass_type}:', len(updates))  # Print the number of updates instead of the full list
+            
             # Iterate over the updates. For ranges of updates that don't have changes in
             # availability or cost, remove the data points between.
             # For example, if there are 3 updates that show the same cost and availability,
             # only keep the first and last updates.
-            unique_updates = []
             for i, update in enumerate(updates):
-                if i == 0:
-                    unique_updates.append(update)
-                elif update[header.index('Cost')] != updates[i - 1][header.index('Cost')] \
-                     or update[header.index('Available')] != updates[i - 1][header.index('Available')]:
-                    # This update is different from the previous one, so include it
-                    unique_updates.append(updates[i - 1])
-                    unique_updates.append(update)
-            unique_data_points.extend(unique_updates)
+                if i == 0 or i == len(updates) - 1:
+                    unique_data_points.append(update)
+                elif (update[header.index('Cost')] != updates[i - 1][header.index('Cost')] or
+                      update[header.index('Available')] != updates[i - 1][header.index('Available')]):
+                    unique_data_points.append(updates[i - 1])
+                    unique_data_points.append(update)
+        
+        print('Unique data points:', len(unique_data_points))
         
         # Write the unique data points to a new CSV file
     with open(csv_file, 'w', newline='') as outfile:
@@ -142,19 +147,19 @@ def trim_csv_data(csv_file):
         writer.writerows(unique_data_points)
 
 def run_scraper_forever():
-    # countdown = 48
+    countdown = 0
     while True:
         print('Scraping data from city of Rexburg website...', flush=True)
         scrape_and_update_data()
         print('Generating plots...', flush=True)
         generate_and_cache_plots(list(csv.DictReader(open('data.csv'))))
         print('Done, next update in 30 minutes\n', flush=True)
-        # if countdown == 0:
-        #     print('Doing periodic data trim...this may take a while...')
-        #     trim_csv_data('data.csv')
-        #     print('Finished data trim')
-        #     countdown = 48
-        # countdown -= 1
+        if countdown == 0:
+            print('Doing periodic data trim...this may take a while...')
+            trim_csv_data('data.csv')
+            print('Finished data trim')
+            countdown = 48
+        countdown -= 1
         sleep(1800)  # Sleep for 30 minutes (1800 seconds)
 
 if __name__ == '__main__':
