@@ -112,34 +112,34 @@ def trim_csv_data(csv_file):
         reader = csv.reader(infile)
         header = next(reader)  # Read the header row
         
-        trimmed_data = [header]
-        last_seen = {}  # Dictionary to store the last seen values for each pass type
+        # Get all unique pass types
+        pass_types = set(row[header.index('Pass Type')] for row in reader)
 
-        for row in reader:
-            pass_type, cost, available, valid_from, valid_to, timestamp = row
-            cost = convert_to_float(cost)
-            available = int(available)
-            
-            # Check if this pass type has been seen before
-            if pass_type in last_seen:
-                last_cost, last_available = last_seen[pass_type]
-                # Add row only if cost or available has changed
-                if cost != last_cost or available != last_available:
-                    trimmed_data.append(row)
-                    last_seen[pass_type] = (cost, available)
-            else:
-                # First occurrence of this pass type
-                trimmed_data.append(row)
-                last_seen[pass_type] = (cost, available)
+        unique_data_points = []
+        for pass_type in all_pass_types:
+            # Get all updates for the current pass type sorted by timestamp
+            updates = sorted([row for row in reader if row[header.index('Pass Type')] == pass_type],
+                             key=lambda row: row[header.index('Timestamp')])
+            # Iterate over the updates. For ranges of updates that don't have changes in
+            # availability or cost, remove the data points between.
+            # For example, if there are 3 updates that show the same cost and availability,
+            # only keep the first and last updates.
+            unique_updates = []
+            for i, update in enumerate(updates):
+                if i == 0:
+                    unique_updates.append(update)
+                elif update[header.index('Cost')] != updates[i - 1][header.index('Cost')] \
+                     or update[header.index('Available')] != updates[i - 1][header.index('Available')]:
+                    # This update is different from the previous one, so include it
+                    unique_updates.append(updates[i - 1])
+                    unique_updates.append(update)
+            unique_data_points.extend(unique_updates)
         
-        # Append the last seen data points for each pass type to the trimmed_data
-        for pass_type, (cost, available) in last_seen.items():
-            if trimmed_data[-1][:2] != [pass_type, str(cost)]:  # Ensure not to duplicate the last line
-                trimmed_data.append([pass_type, cost, available, valid_from, valid_to, timestamp])
-
+        # Write the unique data points to a new CSV file
     with open(csv_file, 'w', newline='') as outfile:
         writer = csv.writer(outfile)
-        writer.writerows(trimmed_data)
+        writer.writerow(header)
+        writer.writerows(unique_data_points)
 
 def run_scraper_forever():
     # countdown = 48
