@@ -146,7 +146,9 @@ def run_scraper_forever():
     while True:
         print('Scraping data from city of Rexburg website...', flush=True)
         scrape_and_update_data()
-        print('Done, next scrape in 30 minutes\n', flush=True)
+        print('Generating plots...', flush=True)
+        generate_and_cache_plots(list(csv.DictReader(open('data.csv'))))
+        print('Done, next update in 30 minutes\n', flush=True)
         # if countdown == 0:
         #     print('Doing periodic data trim...this may take a while...')
         #     trim_csv_data('data.csv')
