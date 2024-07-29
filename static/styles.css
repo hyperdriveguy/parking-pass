@@ -117,7 +117,7 @@ footer {
         display: none;
     }
     .table-view {
-        display: block;
+        display: table;
     }
 }
 
