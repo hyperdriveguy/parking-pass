@@ -49,11 +49,20 @@ def generate_historical_plots(data) -> dict:
     # Group the data by pass type
     data_by_type = defaultdict(list)
     for row in data:
-        pass_type = row['Pass Type']
-        timestamp = datetime.fromisoformat(row['Timestamp'])
-        available = float(row['Available'])
-        cost = convert_to_float(row['Cost'])  # Convert cost to float
-        data_by_type[pass_type].append((timestamp, available, cost))
+        try:
+            pass_type = row['Pass Type']
+            timestamp = datetime.fromisoformat(row['Timestamp'])
+            try:
+                available = convert_to_float(row['Available'])
+            except ValueError:
+                    available = 'N/A'
+            try:
+                cost = convert_to_float(row['Cost'])  # Convert cost to float
+            except ValueError:
+                cost = 'N/A'
+            data_by_type[pass_type].append((timestamp, available, cost))
+        except Exception as e:
+            print(f'{type(e)}: {e}; row "{row}" could not be processed')
 
     # Create a plot for available passes with different colored lines
     fig, ax = plt.subplots(figsize=(10, 6))
