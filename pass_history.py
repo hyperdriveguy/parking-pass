@@ -55,11 +55,11 @@ def generate_historical_plots(data) -> dict:
             try:
                 available = convert_to_float(row['Available'])
             except ValueError:
-                    available = 'N/A'
+                available = None
             try:
-                cost = convert_to_float(row['Cost'])  # Convert cost to float
+                cost = convert_to_float(row['Cost'])
             except ValueError:
-                cost = 'N/A'
+                cost = None
             data_by_type[pass_type].append((timestamp, available, cost))
         except Exception as e:
             print(f'{type(e)}: {e}; row "{row}" could not be processed')
@@ -69,7 +69,10 @@ def generate_historical_plots(data) -> dict:
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     for i, (pass_type, type_data) in enumerate(data_by_type.items()):
         timestamps, availables, _ = zip(*type_data)
-        ax.plot(timestamps, availables, color=colors[i % len(colors)], label=pass_type)
+        valid_data = [(t, a) for t, a in zip(timestamps, availables) if a is not None]
+        if valid_data:
+            valid_timestamps, valid_availables = zip(*valid_data)
+            ax.plot(valid_timestamps, valid_availables, color=colors[i % len(colors)], label=pass_type)
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Available Passes')
     ax.set_title('Historical Parking Pass Data - Available Passes')
@@ -88,7 +91,10 @@ def generate_historical_plots(data) -> dict:
     fig, ax = plt.subplots(figsize=(10, 6))
     for i, (pass_type, type_data) in enumerate(data_by_type.items()):
         timestamps, _, costs = zip(*type_data)
-        ax.plot(timestamps, costs, color=colors[i % len(colors)], label=pass_type)
+        valid_data = [(t, c) for t, c in zip(timestamps, costs) if c is not None]
+        if valid_data:
+            valid_timestamps, valid_costs = zip(*valid_data)
+            ax.plot(valid_timestamps, valid_costs, color=colors[i % len(colors)], label=pass_type)
     ax.set_xlabel('Timestamp')
     ax.set_ylabel('Cost')
     ax.set_title('Historical Parking Pass Data - Cost in USD')
