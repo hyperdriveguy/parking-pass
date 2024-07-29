@@ -2,6 +2,7 @@ import csv
 import json
 import time
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 from flask import Flask, Response, jsonify, render_template
 
@@ -24,6 +25,16 @@ def read_data_from_csv():
             data = list(reader)
     return data
 
+def parse_timestamp(timestamp_str):
+    try:
+        return datetime.strptime(timestamp_str, '%Y-%m-%dT%H:%M:%S.%f')
+    except ValueError:
+        try:
+            return datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            print(f"Unable to parse timestamp: {timestamp_str}")
+            return datetime.min
+
 def get_latest_data(data):
     if not data:
         return []
@@ -36,8 +47,19 @@ def get_latest_data(data):
 
     # Get the latest data for each pass type
     latest_data = []
+    current_time = datetime.now()
     for pass_type, type_data in data_by_type.items():
-        latest_data.append(type_data[-1])
+        # Sort data for each pass type by timestamp
+        sorted_data = sorted(type_data, key=lambda x: parse_timestamp(x['Timestamp']), reverse=True)
+
+        # Check if the most recent data is not older than 3 days
+        if sorted_data:
+            latest_timestamp = parse_timestamp(sorted_data[0]['Timestamp'])
+            if current_time - latest_timestamp <= timedelta(days=3):
+                latest_data.append(sorted_data[0])
+
+    # Sort the final list from most recent to oldest
+    latest_data.sort(key=lambda x: parse_timestamp(x['Timestamp']), reverse=True)
 
     return latest_data
 
