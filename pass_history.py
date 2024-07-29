@@ -47,69 +47,56 @@ def convert_to_float(value):
 
 def generate_historical_plots(data) -> dict:
     # Group the data by pass type
-    data_by_type = defaultdict(list)
+    data_by_type = defaultdict(lambda: {'timestamps': [], 'availables': [], 'costs': []})
     for row in data:
         try:
             pass_type = row['Pass Type']
             timestamp = datetime.fromisoformat(row['Timestamp'])
             try:
                 available = convert_to_float(row['Available'])
+                data_by_type[pass_type]['timestamps'].append(timestamp)
+                data_by_type[pass_type]['availables'].append(available)
             except ValueError:
-                available = None
+                pass
             try:
                 cost = convert_to_float(row['Cost'])
+                data_by_type[pass_type]['costs'].append((timestamp, cost))
             except ValueError:
-                cost = None
-            data_by_type[pass_type].append((timestamp, available, cost))
+                pass
         except Exception as e:
             print(f'{type(e)}: {e}; row "{row}" could not be processed')
 
-    # Create a plot for available passes with different colored lines
-    fig, ax = plt.subplots(figsize=(10, 6))
-    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
-    for i, (pass_type, type_data) in enumerate(data_by_type.items()):
-        timestamps, availables, _ = zip(*type_data)
-        valid_data = [(t, a) for t, a in zip(timestamps, availables) if a is not None]
-        if valid_data:
-            valid_timestamps, valid_availables = zip(*valid_data)
-            ax.plot(valid_timestamps, valid_availables, color=colors[i % len(colors)], label=pass_type)
-    ax.set_xlabel('Timestamp')
-    ax.set_ylabel('Available Passes')
-    ax.set_title('Historical Parking Pass Data - Available Passes')
-    ax.legend()
-    ax.set_ylim(bottom=0)  # Set y-axis to start at 0
+    # Create plots
+    plots = {}
+    for plot_type in ['availability', 'cost']:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+        for i, (pass_type, type_data) in enumerate(data_by_type.items()):
+            if plot_type == 'availability':
+                if type_data['availables']:
+                    ax.plot(type_data['timestamps'], type_data['availables'],
+                            color=colors[i % len(colors)], label=pass_type)
+            else:  # cost plot
+                if type_data['costs']:
+                    timestamps, costs = zip(*sorted(type_data['costs']))
+                    ax.plot(timestamps, costs, color=colors[i % len(colors)], label=pass_type)
 
-    # Save the plot to a buffer
-    available_plot_data = io.BytesIO()
-    fig.savefig(available_plot_data, format='png')
-    available_plot_data.seek(0)
+        ax.set_xlabel('Timestamp')
+        ax.set_ylabel('Available Passes' if plot_type == 'availability' else 'Cost in USD')
+        ax.set_title(f'Historical Parking Pass Data - {"Available Passes" if plot_type == "availability" else "Cost in USD"}')
+        ax.legend()
+        ax.set_ylim(bottom=0)  # Set y-axis to start at 0
 
-    # Close the plot
-    plt.close(fig)
+        # Save the plot to a buffer
+        plot_data = io.BytesIO()
+        fig.savefig(plot_data, format='png')
+        plot_data.seek(0)
+        plots[plot_type] = plot_data
 
-    # Create a plot for cost with different colored lines
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for i, (pass_type, type_data) in enumerate(data_by_type.items()):
-        timestamps, _, costs = zip(*type_data)
-        valid_data = [(t, c) for t, c in zip(timestamps, costs) if c is not None]
-        if valid_data:
-            valid_timestamps, valid_costs = zip(*valid_data)
-            ax.plot(valid_timestamps, valid_costs, color=colors[i % len(colors)], label=pass_type)
-    ax.set_xlabel('Timestamp')
-    ax.set_ylabel('Cost')
-    ax.set_title('Historical Parking Pass Data - Cost in USD')
-    ax.legend()
-    ax.set_ylim(bottom=0)  # Set y-axis to start at 0
+        # Close the plot
+        plt.close(fig)
 
-    # Save the plot to a buffer
-    cost_plot_data = io.BytesIO()
-    fig.savefig(cost_plot_data, format='png')
-    cost_plot_data.seek(0)
-
-    # Close the plot
-    plt.close(fig)
-
-    return {'availability': available_plot_data, 'cost': cost_plot_data}
+    return plots
 
 def generate_and_cache_plots(data):
     plot_data = generate_historical_plots(data)
