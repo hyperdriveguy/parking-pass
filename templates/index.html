@@ -29,6 +29,8 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <p>Fresh data is unavailable. The City of Rexburg payment page may be down at this time.</p>
             {% endif %}
             <div class="card-view">
                 {% for row in latest_data %}
