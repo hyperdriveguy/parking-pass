@@ -18,6 +18,8 @@ if not os.path.exists(PLOTS_DIR):
 
 def scrape_and_update_data():
     data = rexburg_pass.scrape_parking_pass_info()
+    if len(data) <= 0:
+        return
     
     # Add a timestamp field to each row
     for row in data:

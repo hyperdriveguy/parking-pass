@@ -19,17 +19,20 @@ def parse_initial_parking_pass_info(html_content):
     """
     Parses the initial HTML content to extract parking pass options.
     """
-    soup = BeautifulSoup(html_content, 'html.parser')
-    pass_options = soup.find('select', {'name': 'inv_id'}).find_all('option')
-    
     passes_info = []
-    for option in pass_options:
-        if option['value']:
-            pass_text = option.text.strip()
-            coverage_dates = pass_text.split('(')[0].strip()
-            available = pass_text.split('(')[1].split(' ')[0].strip()
-            pass_id = option['value']
-            passes_info.append((coverage_dates, available, pass_id))
+    soup = BeautifulSoup(html_content, 'html.parser')
+    try:
+        pass_options = soup.find('select', {'name': 'inv_id'}).find_all('option')
+
+        for option in pass_options:
+            if option['value']:
+                pass_text = option.text.strip()
+                coverage_dates = pass_text.split('(')[0].strip()
+                available = pass_text.split('(')[1].split(' ')[0].strip()
+                pass_id = option['value']
+                passes_info.append((coverage_dates, available, pass_id))
+    except Exception as e:
+        print(f'Failed to scrape City of Rexburg website, {type(e)}: {e}')
     
     return passes_info
 

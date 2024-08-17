@@ -10,6 +10,7 @@
         <h1>Parking Pass Data</h1>
         <h2>Latest Data</h2>
         <section id="latest-data">
+            {% if len(latest_data) > 0 %}
             <table class="table-view">
                 <thead>
                     <tr>
@@ -28,6 +29,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% endif %}
             <div class="card-view">
                 {% for row in latest_data %}
                 <div class="card">

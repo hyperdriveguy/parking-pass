@@ -67,7 +67,7 @@ def get_latest_data(data):
 def index():
     latest_data = get_latest_data(read_data_from_csv())
     plot_filenames = get_cached_plots_filenames()
-    return render_template('index.html', latest_data=latest_data, plot_filenames=plot_filenames)
+    return render_template('index.html', latest_data=latest_data, plot_filenames=plot_filenames, len=len)
 
 @app.route(subdir_endpoint + '/latest')
 def parking_data():
